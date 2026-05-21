@@ -1,24 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Bell, Menu, Moon, Search, Settings, Sun, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
 import { SearchBar } from '@/components/ui/SearchBar';
 import { Tooltip } from '@/components/ui/Tooltip';
-import { Tabs } from '@/components/ui/Tabs';
 import { useAppStore } from '@/store';
 import { useNotifications } from '@/hooks/useFinance';
 import { useDebounce } from '@/hooks/useDebounce';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { cn } from '@/utils';
 
+// Top tabs are real routes — clicking navigates the page.
 const TOP_TABS = [
-  { id: 'portfolio', label: 'Portfolio' },
-  { id: 'analysis', label: 'Analysis' },
-  { id: 'markets', label: 'Markets' },
+  { id: 'portfolio', label: 'Portfolio', to: '/portfolio' },
+  { id: 'analysis', label: 'Analysis', to: '/analytics' },
+  { id: 'markets', label: 'Markets', to: '/watchlist' },
 ] as const;
 
 export function TopNavbar() {
-  const [activeTab, setActiveTab] = useState<string>('portfolio');
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [draftQuery, setDraftQuery] = useState('');
 
@@ -95,18 +94,39 @@ export function TopNavbar() {
         />
       </div>
 
-      {/* Top tabs (lg+) */}
+      {/* Top tabs (lg+) — real router links */}
       <nav
-        className="hidden lg:flex flex-1 justify-center"
+        className="hidden lg:flex flex-1 justify-center items-center gap-1"
         aria-label="Section view"
       >
-        <Tabs
-          tabs={TOP_TABS}
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          variant="underline"
-          className="h-20 border-none"
-        />
+        {TOP_TABS.map((tab) => (
+          <NavLink
+            key={tab.id}
+            to={tab.to}
+            className={({ isActive }) =>
+              cn(
+                'relative px-4 py-2 text-label-sm font-medium rounded-lg transition-colors',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50',
+                isActive
+                  ? 'text-text-primary'
+                  : 'text-text-muted hover:text-text-secondary hover:bg-surface-mid',
+              )
+            }
+            aria-label={`Open ${tab.label}`}
+          >
+            {({ isActive }) => (
+              <>
+                {tab.label}
+                {isActive && (
+                  <span
+                    className="absolute left-3 right-3 -bottom-[18px] h-[2px] rounded-full bg-blue-500"
+                    aria-hidden="true"
+                  />
+                )}
+              </>
+            )}
+          </NavLink>
+        ))}
       </nav>
 
       {/* Spacer when tabs are hidden, keeps actions right-aligned */}
